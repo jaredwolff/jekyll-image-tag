@@ -88,7 +88,14 @@ module Jekyll
       raise "Image Tag can't find the \"#{markup[:preset]}\" preset. Check image: presets in _config.yml for a list of presets." unless preset || dim ||  markup[:preset].nil?
 
       # Generate resized images
-      generated_src = generate_image(instance, site.source, site.dest, settings['source'], settings['output'])
+      generated_path = generate_image(instance, site.source, site.dest, settings['source'], settings['output'])
+
+      # Generate the string represenation of the total path
+      if settings['use_full_url']
+        generated_src = site.config['url'] + generated_path.to_s
+      else
+        generated_src = generated_path.to_s
+      end
 
       # Return the markup!
       "<img src=\"#{generated_src}\" #{html_attr_string}>"
