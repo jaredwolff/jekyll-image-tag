@@ -114,19 +114,16 @@ module Jekyll
       orig_height = image[:height].to_f
       orig_ratio = orig_width/orig_height
 
-      gen_width = if instance[:width]
-        instance[:width].to_f
-      elsif instance[:height]
-        orig_ratio * instance[:height].to_f
+      gen_width = instance[:width].to_f
+      gen_height = instance[:height].to_f
+
+      if gen_width == 0 and gen_height > 0   # Assumes auto for width
+        gen_width = orig_ratio * gen_height
+      elsif gen_width > 0 and gen_height = 0  # Assumes auto for height
+        gen_height = gen_width / orig_ratio
       else
-        orig_width
-      end
-      gen_height = if instance[:height]
-        instance[:height].to_f
-      elsif instance[:width]
-        instance[:width].to_f / orig_ratio
-      else
-        orig_height
+        gen_width = orig_width
+        gen_height = orig_height
       end
       gen_ratio = gen_width/gen_height
 
