@@ -119,7 +119,7 @@ module Jekyll
 
       if gen_width == 0 and gen_height > 0   # Assumes auto for width
         gen_width = orig_ratio * gen_height
-      elsif gen_width > 0 and gen_height = 0  # Assumes auto for height
+      elsif gen_width > 0 and gen_height == 0  # Assumes auto for height
         gen_height = gen_width / orig_ratio
       else
         gen_width = orig_width
