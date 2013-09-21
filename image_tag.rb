@@ -18,6 +18,7 @@ require 'fileutils'
 require 'pathname'
 require 'digest/md5'
 require 'mini_magick'
+require 'fastimage'
 
 module Jekyll
 
@@ -103,15 +104,16 @@ module Jekyll
 
     def generate_image(instance, site_source, site_dest, image_source, image_dest)
 
-      image = MiniMagick::Image.open(File.join(site_source, image_source, instance[:src]))
-      digest = Digest::MD5.hexdigest(image.to_blob).slice!(0..5)
+      image_path = File.join(site_source, image_source, instance[:src])
+
+      size = FastImage.size(image_path);
 
       image_dir = File.dirname(instance[:src])
       ext = File.extname(instance[:src])
       basename = File.basename(instance[:src], ext)
 
-      orig_width = image[:width].to_f
-      orig_height = image[:height].to_f
+      orig_width = size[0].to_f
+      orig_height = size[1].to_f
       orig_ratio = orig_width/orig_height
 
       gen_width = instance[:width].to_f
@@ -131,12 +133,19 @@ module Jekyll
         gen_height = if orig_ratio > gen_ratio then orig_height else orig_width/gen_ratio end
       end
 
+      image_file = File.open(image_path, "r")
+      image_file_contents = image_file.read
+
+      digest = Digest::MD5.hexdigest(image_file_contents).slice!(0..5)
+
       gen_name = "#{basename}-#{gen_width.round}x#{gen_height.round}-#{digest}#{ext}"
       gen_dest_dir = File.join(site_dest, image_dest, image_dir)
       gen_dest_file = File.join(gen_dest_dir, gen_name)
 
       # Generate resized files
       unless File.exists?(gen_dest_file)
+
+        image = MiniMagick::Image.open(File.join(site_source, image_source, instance[:src]))
 
         warn "Warning:".yellow + " #{instance[:src]} is smaller than the requested output file. It will be resized without upscaling." if undersize
 
