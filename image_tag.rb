@@ -38,9 +38,10 @@ module Jekyll
       site = context.registers[:site]
       settings = site.config['image']
       markup = /^(?:(?<preset>[^\s.:\/]+)\s+)?(?<image_src>[^\s]+\.[a-zA-Z0-9]{3,4})\s*(?<html_attr>[\s\S]+)?$/.match(render_markup)
-      preset = settings['presets'][ markup[:preset] ]
 
       raise "Image Tag can't read this tag. Try {% image [preset or WxH] path/to/img.jpg [attr=\"value\"] %}." unless markup
+
+      preset = settings['presets'][ markup[:preset] ]
 
       # Assign defaults
       settings['source'] ||= '.'
