@@ -39,7 +39,7 @@ module Jekyll
       settings = site.config['image']
       markup = /^(?:(?<preset>[^\s.:\/]+)\s+)?(?<image_src>[^\s]+\.[a-zA-Z0-9]{3,4})\s*(?<html_attr>[\s\S]+)?$/.match(render_markup)
 
-      raise "Image Tag can't read this tag. Try {% image [preset or WxH] path/to/img.jpg [attr=\"value\"] %}." unless markup
+      raise "Image Tag: can't read this tag. Try {% image [preset or WxH] path/to/img.jpg [attr=\"value\"] %}." unless markup
 
       preset = settings['presets'][ markup[:preset] ]
 
@@ -87,7 +87,7 @@ module Jekyll
       }
 
       # Raise some exceptions before we start expensive processing
-      raise "Image Tag can't find the \"#{markup[:preset]}\" preset. Check image: presets in _config.yml for a list of presets." unless preset || dim ||  markup[:preset].nil?
+      raise "Image Tag: can't find the \"#{markup[:preset]}\" preset. Check image: presets in _config.yml for a list of presets." unless preset || dim ||  markup[:preset].nil?
 
       # Generate resized images
       generated_path = generate_image(instance, site.source, site.dest, settings['source'], settings['output'])
@@ -106,6 +106,8 @@ module Jekyll
     def generate_image(instance, site_source, site_dest, image_source, image_dest)
 
       image_path = File.join(site_source, image_source, instance[:src])
+
+      raise "Image Tag: \"#{image_path}\" does not exist!" unless File.exist?(image_path)
 
       size = FastImage.size(image_path);
 
@@ -148,7 +150,7 @@ module Jekyll
 
         image = MiniMagick::Image.open(File.join(site_source, image_source, instance[:src]))
 
-        warn "Warning:".yellow + " #{instance[:src]} is smaller than the requested output file. It will be resized without upscaling." if undersize
+        warn "Image Tag: #{instance[:src]} is smaller than the requested output file. It will be resized without upscaling." if undersize
 
         #  If the destination directory doesn't exist, create it
         FileUtils.mkdir_p(gen_dest_dir) unless File.exist?(gen_dest_dir)
