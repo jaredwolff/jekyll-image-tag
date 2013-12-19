@@ -119,21 +119,35 @@ module Jekyll
       orig_height = size[1].to_f
       orig_ratio = orig_width/orig_height
 
-      gen_width = instance[:width].to_f
-      gen_height = instance[:height].to_f
+      gen_width = 0
+      gen_height = 0
 
-      if gen_width == 0 and gen_height > 0   # Assumes auto for width
-        gen_width = orig_ratio * gen_height
-      elsif gen_width > 0 and gen_height == 0  # Assumes auto for height
-        gen_height = gen_width / orig_ratio
-      end
-      gen_ratio = gen_width/gen_height
+      # Handles the case where both width and height are auto
+      if instance[:width] == "auto" && instance[:height] == "auto"
 
-      # Don't allow upscaling. If the image is smaller than the requested dimensions, recalculate.
-      if orig_width < gen_width || orig_height < gen_height
-        undersize = true
-        gen_width = if orig_ratio < gen_ratio then orig_width else orig_height * gen_ratio end
-        gen_height = if orig_ratio > gen_ratio then orig_height else orig_width/gen_ratio end
+        gen_width = orig_width
+        gen_height = orig_height
+
+      # Otherwise processes per the config data
+      else
+
+        gen_width = instance[:width].to_f
+        gen_height = instance[:height].to_f
+
+        if gen_width == 0 and gen_height > 0   # Assumes auto for width
+          gen_width = orig_ratio * gen_height
+        elsif gen_width > 0 and gen_height == 0  # Assumes auto for height
+          gen_height = gen_width / orig_ratio
+        end
+        gen_ratio = gen_width/gen_height
+
+        # Don't allow upscaling. If the image is smaller than the requested dimensions, recalculate.
+        if orig_width < gen_width || orig_height < gen_height
+          undersize = true
+          gen_width = if orig_ratio < gen_ratio then orig_width else orig_height * gen_ratio end
+          gen_height = if orig_ratio > gen_ratio then orig_height else orig_width/gen_ratio end
+        end
+
       end
 
       image_file = File.open(image_path, "r")
