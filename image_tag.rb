@@ -50,6 +50,9 @@ module Jekyll
       # Prevent Jekyll from erasing our generated files
       site.config['keep_files'] << settings['output'] unless site.config['keep_files'].include?(settings['output'])
 
+      # Keep this image for social media purposses
+      keep_image = false
+
       # Process instance
       instance = if preset
         {
@@ -82,7 +85,11 @@ module Jekyll
         if attrs[1]
           string << "#{attrs[0]}=\"#{attrs[1]}\" "
         else
-          string << "#{attrs[0]} "
+          if attrs[0] == "keep"
+            keep_image = true
+          else
+            string << "#{attrs[0]} "
+          end
         end
       }
 
@@ -90,7 +97,7 @@ module Jekyll
       raise "Image Tag: can't find the \"#{markup[:preset]}\" preset. Check image: presets in _config.yml for a list of presets." unless preset || dim ||  markup[:preset].nil?
 
       # Generate resized images
-      generated_path = generate_image(instance, site.source, site.dest, settings['source'], settings['output'])
+      generated_path = generate_image(instance, site.source, site.dest, settings['source'], settings['output'], keep_image)
 
       # Generate the string represenation of the total path
       if settings['use_full_url']
@@ -103,7 +110,7 @@ module Jekyll
       "<img src=\"#{generated_src}\" #{html_attr_string}>"
     end
 
-    def generate_image(instance, site_source, site_dest, image_source, image_dest)
+    def generate_image(instance, site_source, site_dest, image_source, image_dest, keep_image)
 
       image_path = File.join(site_source, image_source, instance[:src])
 
@@ -158,6 +165,15 @@ module Jekyll
       gen_name = "#{basename}-#{gen_width.round}x#{gen_height.round}-#{digest}#{ext}"
       gen_dest_dir = File.join(site_dest, image_dest, image_dir)
       gen_dest_file = File.join(gen_dest_dir, gen_name)
+      
+      #Copy image to destination if it has the "keep" property
+      if keep_image
+        copy_dest_file = File.join(gen_dest_dir,File.basename(instance[:src]) )
+        
+        unless File.exists?(copy_dest_file)
+          FileUtils.cp(image_path, gen_dest_dir)
+        end
+      end
 
       # Generate resized files
       unless File.exists?(gen_dest_file)
