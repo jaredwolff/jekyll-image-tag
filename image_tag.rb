@@ -85,13 +85,13 @@ module Jekyll
         if attrs[1]
           string << "#{attrs[0]}=\"#{attrs[1]}\" "
         else
-          if attrs[0] == "keep"
-            keep_image = true
-          else
-            string << "#{attrs[0]} "
-          end
+          string << "#{attrs[0]} "
         end
       }
+      
+      if render_markup.include? "keep=\"true\""
+        keep_image = true
+      end
 
       # Raise some exceptions before we start expensive processing
       raise "Image Tag: can't find the \"#{markup[:preset]}\" preset. Check image: presets in _config.yml for a list of presets." unless preset || dim ||  markup[:preset].nil?
